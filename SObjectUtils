@@ -1,0 +1,20 @@
+public class SObjectUtils {
+  // Return a list of string field values from a specified field name for a passed list of records
+  private List<String> getStrings(List<sObject> records, String fieldToRetrieve){ 
+    List<String> values = new List<String>(); 
+    for(Sobject record : records) {
+      String value = (String) record.get(fieldToRetrieve);  
+      values.add(value); 
+    } 
+    return values; 
+   }
+  
+  // Return a set of Ids when passed a list of records
+  public Set<Id> getIds(List<sObject> objects) {
+    Set<Id> objectIds = new Set<Id>(); 
+    for(sObject obj : objects) {
+      objectIds.add(obj.Id);
+    } 
+    return objectIds; 
+  }
+}
