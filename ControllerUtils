@@ -1,0 +1,62 @@
+public class ControllerUtils {	
+	// Build query string
+    public static String buildQueryStatement(List<String> fields, String objectName, String whereStatement, String sortedBy, String sortDirection) {
+        if (fields.isEmpty()) {
+			return 'Missing field names for select statement';            
+        } else if (String.isBlank(objectName)) {
+            return 'Missing object name for select statement';
+        }
+        String selectStatement = 'SELECT ' + StringUtils.joinStrings(fields) + ' FROM ' + objectName;   
+        if (String.isNotBlank(whereStatement)) {
+            whereStatement = ' WHERE ' + whereStatement;
+        } else {
+            whereStatement = '';
+        }
+        String orderByStatement = '';
+        if (String.isNotBlank(sortedBy)) {
+            orderByStatement = ' ORDER BY ' + sortedBy;
+            if (String.isNotBlank(sortDirection)) {
+                orderByStatement += ' ' + sortDirection;
+            }            
+        }        
+               
+        String query = selectStatement + whereStatement + orderByStatement;
+        return query;
+    }
+    
+    // SOSL
+    public static List<String> searchAllFieldsSOSL(String objectName, String searchText) {
+        if (String.isBlank(objectName) || String.isBlank(searchText) || searchText?.length() < 2) {
+            return null;
+        }
+        searchText = String.escapeSingleQuotes(searchText);       
+        String soslQuery = 'FIND \'' + searchText + '\' IN ALL FIELDS RETURNING ' + objectName + '(Id)';
+        List<List<SObject>> results = search.query(soslQuery);
+        List<String> Ids = new List<String>();
+        for (List<SObject> sobjs : results) {
+            for (SObject sobj : sobjs) {
+                ids.add(sobj.Id);
+            }
+        }                 
+        return Ids;
+    }
+    
+	// Create portal user
+    public static String createPortalUser(String profileName, Contact c) {
+        Profile p = [SELECT Id FROM Profile WHERE Name = :profileName]; 
+        User u = new User(Alias = 'testu', 
+                          FirstName = c.FirstName,
+                          LastName = c.FirstName, 
+                          Email = c.Email,  
+                          UserName = c.Email,
+                          ContactId = c.Id,
+                          EmailEncodingKey = 'UTF-8',                          
+                          LanguageLocaleKey = 'en_US',             
+                          LocaleSidKey = 'en_US', 
+                          ProfileId = p.Id, 
+                          TimeZoneSidKey = 'America/Los_Angeles',
+                          IsActive = true);
+        insert u;
+        return u.Id;
+    }
+}
