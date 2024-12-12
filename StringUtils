@@ -1,0 +1,21 @@
+public class StringUtils {        
+    public static String capitalizeAllWords(String input) {        
+        if (String.isNotBlank(input)) {
+            input = input.trim(); // Added trim() to make handling of white space more predictable
+            List<String> words = input.split(' ');
+            for (Integer i = 0; i < words.size(); i++) {                
+                words[i] = words[i].capitalize();
+            }
+            return String.join(words, ' ');
+        } else {
+            return input;
+        }
+    }
+    
+    public static String joinStrings(List<String> stringList) {
+        if (stringList == null || stringList.isEmpty()) {
+            return '';
+        }
+        return String.join(stringList, ', ');
+    }
+}
