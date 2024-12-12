@@ -1,0 +1,252 @@
+// Written to standardize address formats across objects.
+public class AddressCleaner {        
+    @invocableMethod(label='Clean Address' description='Returns standardized address fields')
+    public static List<CleanedAddress> cleanAddressFromFlow(List<AddressInput> inputs) {
+        List<CleanedAddress> results = new List<CleanedAddress>();
+        try {            
+            for (AddressInput input : inputs) {
+                CleanedAddress cleaned = new CleanedAddress();
+                cleaned.street = cleanStreet(input.street);
+                cleaned.city = cleanCity(input.city);
+                cleaned.state = cleanState(input.state, input.zip);
+                cleaned.zip = cleanZip(input.zip);
+                cleaned.country = cleanCountry(input.country, input.zip);
+                results.add(cleaned);
+            }            
+        } catch (exception ex) {
+            Support_Ticket.apexException(ex, 'DataQuality_CleanAddress', 'cleanAddressFromFlow');
+        }      
+        return results;
+    }
+    
+    public static String cleanStreet(String street) {
+        if (String.isBlank(street)) {
+            return street;
+        }
+        street = street.replaceAll('[^a-zA-Z0-9 \',.#-]', '').replaceAll('\\s+', ' '); // Remove special characters that are not allowed in standard street addresses
+        return StringUtils.capitalizeAllWords(street.trim().toLowerCase());
+    }
+    
+    public static String cleanCity(String city) {
+        if (String.isBlank(city)) {
+            return city;
+        }
+        city = city.replaceAll('[^a-zA-Z \'-]'.replaceAll('\\s+', ' '), ''); 
+        return StringUtils.capitalizeAllWords(city?.trim().toLowerCase());
+    }
+    
+    public static String cleanState(String state, String zip) {
+        String cleanedZip = cleanZip(zip);
+        if (String.isNotBlank(cleanedZip) && Integer.valueOf(cleanedZip) >= 90001 && Integer.valueOf(cleanedZip) <= 96162) {
+            return 'CA';
+        } else if (String.isNotBlank(state)) {
+            state = state.replaceAll('[^a-zA-Z \'-]', '').trim().replaceAll('\\s+', ' ');
+            if (state.length() == 2) {
+                return state.toUpperCase();
+            } else {
+                state = convertStateTo2DigitFormat(StringUtils.capitalizeAllWords(state.toLowerCase()));      
+            }                  
+        }
+        return state;
+    }
+    
+    public static String cleanZip(String zip) {        
+        return zip != null ? zip.deleteWhitespace().replaceAll('[^0-9]', '').left(5) : null;
+    }
+    
+    public static String cleanCountry(String country, String zip) {
+        List<String> unitedStatesValues = new List<String>{'us', 'usa', 'america', 'guam', 'puerto rico', 'estados unidos'};
+        String cleanedZip = cleanZip(zip);
+        if (String.isNotBlank(cleanedZip) && Integer.valueOf(cleanedZip) >= 00501 && Integer.valueOf(cleanedZip) <= 99950) {
+            return 'United States';
+        } else if (String.isNotBlank(country) && unitedStatesValues.contains(country.toLowerCase())) {
+            return 'United States';
+        } else {
+            return country != null ? StringUtils.capitalizeAllWords(country.toLowerCase().replaceAll('[^a-zA-Z \'-]', '').trim().replaceAll('\\s+', ' ')) : null;
+        }
+    }    
+    
+    private static String convertStateTo2DigitFormat(String state) {
+        switch on state {
+            when 'Alabama' {
+                return 'AL';
+            }
+            when 'Alaska' {
+                return 'AK';
+            }
+            when 'Arizona' {
+                return 'AZ';
+            }
+            when 'Arkansas' {
+                return 'AR';
+            }
+            when 'California' {
+                return 'CA';
+            }
+            when 'Colorado' {
+                return 'CO';
+            }
+            when 'Connecticut' {
+                return 'CT';
+            }
+            when 'Delaware' {
+                return 'DE';
+            }
+            when 'Florida' {
+                return 'FL';
+            }
+            when 'Georgia' {
+                return 'GA';
+            }
+            when 'Hawaii' {
+                return 'HI';
+            }
+            when 'Idaho' {
+                return 'ID';
+            }
+            when 'Illinois' {
+                return 'IL';
+            }
+            when 'Indiana' {
+                return 'IN';
+            }
+            when 'Iowa' {
+                return 'IA';
+            }
+            when 'Kansas' {
+                return 'KS';
+            }
+            when 'Kentucky' {
+                return 'KY';
+            }
+            when 'Louisiana' {
+                return 'LA';
+            }
+            when 'Maine' {
+                return 'ME';
+            }
+            when 'Maryland' {
+                return 'MD';
+            }
+            when 'Massachusetts' {
+                return 'MA';
+            }
+            when 'Michigan' {
+                return 'MI';
+            }
+            when 'Minnesota' {
+                return 'MN';
+            }
+            when 'Mississippi' {
+                return 'MS';
+            }
+            when 'Missouri' {
+                return 'MO';
+            }
+            when 'Montana' {
+                return 'MT';
+            }
+            when 'Nebraska' {
+                return 'NE';
+            }
+            when 'Nevada' {
+                return 'NV';
+            }
+            when 'New Hampshire' {
+                return 'NH';
+            }
+            when 'New Jersey' {
+                return 'NJ';
+            }
+            when 'New Mexico' {
+                return 'NM';
+            }
+            when 'New York' {
+                return 'NY';
+            }
+            when 'North Carolina' {
+                return 'NC';
+            }
+            when 'North Dakota' {
+                return 'ND';
+            }
+            when 'Ohio' {
+                return 'OH';
+            }
+            when 'Oklahoma' {
+                return 'OK';
+            }
+            when 'Oregon' {
+                return 'OR';
+            }
+            when 'Pennsylvania' {
+                return 'PA';
+            }
+            when 'Rhode Island' {
+                return 'RI';
+            }
+            when 'South Carolina' {
+                return 'SC';
+            }
+            when 'South Dakota' {
+                return 'SD';
+            }
+            when 'Tennessee' {
+                return 'TN';
+            }
+            when 'Texas' {
+                return 'TX';
+            }
+            when 'Utah' {
+                return 'UT';
+            }
+            when 'Vermont' {
+                return 'VT';
+            }
+            when 'Virginia' {
+                return 'VA';
+            }
+            when 'Washington' {
+                return 'WA';
+            }
+            when 'West Virginia' {
+                return 'WV';
+            }
+            when 'Wisconsin' {
+                return 'WI';
+            }
+            when 'Wyoming' {
+                return 'WY';
+            }
+            when else {
+                return state; // Return the original state if no match is found
+            }
+        }
+    }
+    
+    public class AddressInput {
+        @InvocableVariable(required=false)
+        public String street;
+        @InvocableVariable(required=false)
+        public String city;
+        @InvocableVariable(required=false)
+        public String state;
+        @InvocableVariable(required=false)
+        public String zip;
+        @InvocableVariable(required=false)
+        public String country;
+    }
+
+    public class CleanedAddress {
+        @InvocableVariable
+        public String street;
+        @InvocableVariable
+        public String city;
+        @InvocableVariable
+        public String state;
+        @InvocableVariable
+        public String zip;
+        @InvocableVariable
+        public String country;
+    }
+}
