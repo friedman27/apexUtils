@@ -1,0 +1,20 @@
+public class Support_Ticket {
+    
+  public static Support_Ticket__c apexException(Exception e, String className, String methodName) {    
+      String subject = 'Exception found in ' + className + '.' + methodName + '()';
+      String description = 'Exception found at line ' + e.getLineNumber() + ': ' + e.getMessage() + '\n\n' + e.getStackTraceString();
+      String category = 'Apex Error';
+      Support_Ticket__c ticket = createSupportTicket(subject, description, true, category);
+      return ticket;
+  }
+
+  private static Support_Ticket__c createSupportTicket(String subject, String description, Boolean escalated, String category) {                     
+        Support_Ticket__c st = new Support_Ticket__c();
+        st.Subject__c = subject;
+        st.Description__c = description;
+        st.Escalated__c = escalated;
+        st.Category__c = category;
+        insert st;        
+        return st;        
+    }
+}
